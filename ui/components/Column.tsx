@@ -2,15 +2,16 @@ import * as React from 'react';
 import {useState} from 'react';
 import Card from "./Card";
 import styled from "styled-components";
-import {CardType, ColumnType} from "../types";
+import {CardId, CardType, ColumnId, ColumnType} from "../types";
 import {StyledInput} from "./StyledInput.tsx";
-import {TSID} from "tsid-ts";
+import {useDrop} from 'react-dnd'
 
-const StyledColumn = styled.div`
+const StyledColumn = styled.div<{ $isOver: boolean }>`
   flex: 1;
   background-color: ${({color}) => color || '#ffffff'};
   padding: 20px;
   border-radius: 8px;
+  opacity: ${({$isOver}) => $isOver ? 0.5 : 1.0};
 `;
 
 const StyledForm = styled.form`
@@ -23,27 +24,47 @@ const EmojiIconContainer = styled.div`
 `;
 
 interface ColumnProps extends ColumnType {
-    onAddCard: ((cardText: string) => void);
-    onDeleteCard: ((cardId: TSID) => void);
-    onUpdateCard: ((cardId: TSID, toUpdate: Partial<CardType>) => void);
+    onAddCard: ((text: string) => void);
+    onDeleteCard: ((cardId: CardId) => void);
+    onUpdateCard: ((cardId: CardId, toUpdate: Partial<CardType>) => void);
+    onDrop: ((columnId: ColumnId, card: CardType) => void);
 }
 
-const Column: React.FC<ColumnProps> = ({title, emoji, cards, color, onAddCard, onDeleteCard, onUpdateCard}) => {
-    const [cardText, setCardText] = useState<string>("");
+const Column: React.FC<ColumnProps> = ({
+                                           id,
+                                           title,
+                                           emoji,
+                                           cards,
+                                           color,
+                                           onAddCard,
+                                           onDeleteCard,
+                                           onUpdateCard,
+                                           onDrop
+                                       }) => {
+    const [text, setText] = useState<string>("");
     const handleAddCard = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!cardText) return;
-        onAddCard(cardText);
-        setCardText("");
+        if (!text) return;
+        onAddCard(text);
+        setText("");
     };
+    const [{isOver}, dropRef] = useDrop({
+        accept: 'CARD',
+        drop: (card: CardType) => {
+            onDrop(id, card);
+        },
+        collect: (monitor) => ({
+            isOver: monitor.isOver(),
+        }),
+    });
     return (
-        <StyledColumn color={color}>
+        <StyledColumn color={color} ref={dropRef} $isOver={isOver}>
             <EmojiIconContainer>{emoji}</EmojiIconContainer>
             <StyledForm onSubmit={handleAddCard}>
                 <StyledInput
                     type="text"
-                    value={cardText}
-                    onChange={(e) => setCardText(e.target.value)}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
                     placeholder={title}
                 />
             </StyledForm>
@@ -51,6 +72,8 @@ const Column: React.FC<ColumnProps> = ({title, emoji, cards, color, onAddCard, o
                     text={card.text}
                     id={card.id}
                     done={card.done}
+                    columnId={card.columnId}
+                    like={card.like}
                     onDelete={() => onDeleteCard(card.id)}
                     onUpdate={toUpdate => onUpdateCard(card.id, toUpdate)}
                     key={card.id.toBase62String()}

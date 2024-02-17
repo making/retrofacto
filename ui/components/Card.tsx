@@ -7,6 +7,7 @@ import EditButton from "./EditButton.tsx";
 import {StyledInput} from "./StyledInput.tsx";
 import DeleteButton from "./DeleteButton.tsx";
 import Modal from "./Modal.tsx";
+import {useDrag} from 'react-dnd'
 
 const StyledCard = styled.div`
   display: flex;
@@ -43,7 +44,7 @@ interface CardTypeProps extends CardType {
     onUpdate: ((toUpdate: Partial<CardType>) => void);
 }
 
-const Card: React.FC<CardTypeProps> = ({id, text, done, onDelete, onUpdate}) => {
+const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete, onUpdate}) => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [txt, setTxt] = useState<string>(text);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -87,10 +88,18 @@ const Card: React.FC<CardTypeProps> = ({id, text, done, onDelete, onUpdate}) => 
 
     const Text = () => done ? <del>{text}</del> : <>{text}</>
 
+    const me: CardType = {id, text, done, columnId, like: likeCount};
+    const [{isDragging}, dragRef] = useDrag({
+        type: 'CARD',
+        item: me,
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
     return (
         <>
-            <StyledCard hidden={done}>
-                <Like cardId={id} initial={0} readonly={done} setLikeCount={setLikeCount}/>
+            <StyledCard hidden={done} ref={dragRef} style={{opacity: isDragging ? 0.5 : 1}}>
+                <Like cardId={id} initial={like} readonly={done} setLikeCount={setLikeCount}/>
                 {isEditing ?
                     <StyledForm onSubmit={handleSubmit}>
                         <StyledInput type="text" value={txt} onChange={handleChange} autoFocus/>

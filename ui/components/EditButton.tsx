@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {StyledButton} from "./StyledButton.tsx";
-import {TSID} from "tsid-ts";
+import {CardId} from "../types";
 
 interface EditButtonProps {
-    cardId: TSID;
+    cardId: CardId;
     onClick: () => void;
     hidden: boolean;
 }

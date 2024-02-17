@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useState} from 'react';
 import styled from 'styled-components';
-import {TSID} from "tsid-ts";
+import {CardId} from "../types";
 
 const LikeButton = styled.button`
   background: transparent;
@@ -21,7 +21,7 @@ const LikeCount = styled.div`
 `;
 
 interface LikeProps {
-    cardId: TSID;
+    cardId: CardId;
     initial: number;
     setLikeCount: (count: number) => void;
     readonly: boolean;
