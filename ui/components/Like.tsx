@@ -3,10 +3,10 @@ import {useState} from 'react';
 import styled from 'styled-components';
 import {CardId} from "../types";
 
-const LikeButton = styled.button`
+const LikeButton = styled.button<{ $readOnly: boolean }>`
   background: transparent;
   border: none;
-  cursor: ${({hidden}) => hidden ? 'auto' : 'pointer'};
+  cursor: ${({$readOnly}) => $readOnly ? 'auto' : 'pointer'};
   font-size: medium;
   margin-right: 20px;
   display: flex;
@@ -24,13 +24,13 @@ interface LikeProps {
     cardId: CardId;
     initial: number;
     setLikeCount: (count: number) => void;
-    readonly: boolean;
+    readOnly: boolean;
 }
 
-const Like: React.FC<LikeProps> = ({initial, setLikeCount, readonly}) => {
+const Like: React.FC<LikeProps> = ({initial, setLikeCount, readOnly}) => {
     const [count, setCount] = useState<number>(initial);
     const handleClick = () => {
-        if (readonly) {
+        if (readOnly) {
             return;
         }
         const newCount = count + 1;
@@ -39,7 +39,7 @@ const Like: React.FC<LikeProps> = ({initial, setLikeCount, readonly}) => {
     };
 
     return (
-        <LikeButton onClick={handleClick} tabIndex={-1} hidden={readonly}>
+        <LikeButton onClick={handleClick} tabIndex={-1} $readOnly={readOnly}>
             ⭐️
             <LikeCount>{count}</LikeCount>
         </LikeButton>

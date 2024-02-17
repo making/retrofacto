@@ -10,7 +10,7 @@ interface EditButtonProps {
 
 const EditButton: React.FC<EditButtonProps> = ({onClick, hidden}) => {
     return (
-        <StyledButton onClick={() => onClick()} tabIndex={-1} style={hidden ? {display: 'none'} : {}}>
+        <StyledButton onClick={() => onClick()} tabIndex={-1} hidden={hidden}>
             ✏️
         </StyledButton>
     );

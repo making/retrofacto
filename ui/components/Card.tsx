@@ -9,12 +9,12 @@ import DeleteButton from "./DeleteButton.tsx";
 import Modal from "./Modal.tsx";
 import {useDrag} from 'react-dnd'
 
-const StyledCard = styled.div`
+const StyledCard = styled.div<{ $done: boolean }>`
   display: flex;
   width: 100%;
   padding: 0 15px 0 15px;
   margin-bottom: 10px;
-  background-color: ${({hidden}) => hidden ? "#ccc" : "#f3f3f3"};
+  background-color: ${({$done}) => $done ? "#ccc" : "#f3f3f3"};
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
@@ -67,7 +67,7 @@ const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete
     };
 
     const handleDelete = () => {
-        const isConfirmed = window.confirm('このカードを削除してもよろしいですか？');
+        const isConfirmed = window.confirm("Are you sure you want to delete this card?");
         if (isConfirmed) {
             onDelete();
         } else {
@@ -98,8 +98,8 @@ const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete
     });
     return (
         <>
-            <StyledCard hidden={done} ref={dragRef} style={{opacity: isDragging ? 0.5 : 1}}>
-                <Like cardId={id} initial={like} readonly={done} setLikeCount={setLikeCount}/>
+            <StyledCard $done={done} ref={dragRef} style={{opacity: isDragging ? 0.5 : 1}}>
+                <Like cardId={id} initial={like} readOnly={done} setLikeCount={setLikeCount}/>
                 {isEditing ?
                     <StyledForm onSubmit={handleSubmit}>
                         <StyledInput type="text" value={txt} onChange={handleChange} autoFocus/>
@@ -115,7 +115,7 @@ const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete
                    markAsDone={markAsDone}
                    redo={redo}>
                 <div>
-                    <Like cardId={id} initial={likeCount} readonly={true} setLikeCount={setLikeCount}/>
+                    <Like cardId={id} initial={likeCount} readOnly={true} setLikeCount={setLikeCount}/>
                     <p><Text/></p>
                 </div>
             </Modal>

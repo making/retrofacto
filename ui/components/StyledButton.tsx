@@ -7,6 +7,6 @@ export const StyledButton = styled.button`
   font-size: 16px;
   margin-left: auto;
   padding: 0 0 0 15px;
-  display: flex;
+  display: ${({hidden}) => hidden ? 'none' : 'flex'};
   align-items: center;
 `;
