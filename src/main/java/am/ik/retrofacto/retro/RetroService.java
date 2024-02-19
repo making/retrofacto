@@ -58,6 +58,20 @@ public class RetroService {
 		});
 	}
 
+	@Transactional
+	public Optional<Card> addLike(TSID cardId) {
+		this.cardRepository.addLike(cardId);
+		return this.cardRepository.findById(cardId);
+	}
+
+	@Transactional
+	public Optional<Card> deleteCard(TSID cardId) {
+		return this.cardRepository.findById(cardId).map(card -> {
+			this.cardRepository.delete(card);
+			return card;
+		});
+	}
+
 	public record UpdateCard(String text, Boolean done, TSID columnId) {
 
 	}
