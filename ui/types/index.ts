@@ -1,8 +1,5 @@
-import {TSID} from "tsid-ts";
-
-
-export type CardId = TSID;
-export type ColumnId = number;
+export type CardId = string;
+export type ColumnId = string;
 
 export interface CardType {
     id: CardId;

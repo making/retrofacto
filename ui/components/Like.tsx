@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {useState} from 'react';
 import styled from 'styled-components';
 import {CardId} from "../types";
 
@@ -22,26 +21,23 @@ const LikeCount = styled.div`
 
 interface LikeProps {
     cardId: CardId;
-    initial: number;
-    setLikeCount: (count: number) => void;
+    like: number;
+    handleAddLike: (count: number) => void;
     readOnly: boolean;
 }
 
-const Like: React.FC<LikeProps> = ({initial, setLikeCount, readOnly}) => {
-    const [count, setCount] = useState<number>(initial);
+const Like: React.FC<LikeProps> = ({like, handleAddLike, readOnly}) => {
     const handleClick = () => {
         if (readOnly) {
             return;
         }
-        const newCount = count + 1;
-        setCount(newCount);
-        setLikeCount(newCount);
+        handleAddLike(like + 1);
     };
 
     return (
         <LikeButton onClick={handleClick} tabIndex={-1} $readOnly={readOnly}>
             ⭐️
-            <LikeCount>{count}</LikeCount>
+            <LikeCount>{like}</LikeCount>
         </LikeButton>
     );
 };

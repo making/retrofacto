@@ -3,8 +3,6 @@ import {useState} from "react";
 import Column from "./Column";
 import styled from "styled-components";
 import {CardId, CardType, ColumnId, ColumnType} from "../types";
-import {getTsid} from "tsid-ts";
-
 
 const BoardTitle = styled.h2`
   text-align: center;
@@ -22,67 +20,126 @@ const StyledBoard = styled.div`
   margin: 20px auto;
 `;
 
+
 interface BoardProps {
-    title: string;
+    slug: string,
+    eventSource: EventSource;
 }
 
-const Board: React.FC<BoardProps> = ({title}) => {
-    const [columns, setColumns] = useState<ColumnType[]>([
-        {
-            id: 1,
-            title: 'I\'m glad that...',
-            emoji: '😀',
-            cards: [],
-            color: '#70beb1'
-        },
-        {
-            id: 2,
-            title: 'I\'m wondering about...',
-            emoji: '🤔',
-            cards: [],
-            color: '#f5c94c'
-        },
-        {
-            id: 3,
-            title: 'It wasn\'t so great that...',
-            emoji: '😱',
-            cards: [],
-            color: '#d35948'
-        }
-    ]);
+const cardSorter = (a: CardType, b: CardType) => {
+    if (a.id < b.id) {
+        return -1;
+    }
+    if (a.id > b.id) {
+        return 1;
+    }
+    return 0;
+};
 
-    const handleAddExistingCard = (columnId: ColumnId, card: CardType) => {
-        setColumns((columns) =>
-            columns.map(column => {
-                if (column.id === columnId) {
-                    return {
-                        ...column,
-                        cards: [...column.cards, card]
-                    };
-                }
-                return column;
-            })
-        );
+const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
+
+    const [name, setName] = useState<string>("...");
+    const [columns, setColumns] = useState<ColumnType[]>([]);
+    const [emitterId, setEmitterId] = useState<string>();
+
+
+    eventSource.onmessage = event => {
+        const cardEvent = JSON.parse(event.data);
+        const type = cardEvent.type;
+        if (type === 'LOAD') {
+            const board = cardEvent.board;
+            board.columns.forEach((column: ColumnType) => {
+                column.cards.sort(cardSorter);
+            });
+            setEmitterId(cardEvent.emitterId);
+            setName(board.name);
+            setColumns(board.columns);
+        } else if (type === 'CREATE') {
+            const {card, columnId} = cardEvent;
+            setColumns(columns.map(column => {
+                    if (column.id === columnId) {
+                        const newCards: CardType[] = [...column.cards, card];
+                        newCards.sort(cardSorter);
+                        return {
+                            ...column,
+                            cards: newCards
+                        };
+                    }
+                    return column;
+                })
+            );
+        } else if (type === 'UPDATE') {
+            const {card: toUpdate, columnId} = cardEvent;
+            setColumns(columns.map(column => {
+                    if (column.id === columnId) {
+                        const newCards: CardType[] = column.cards.map(card => {
+                            return card.id === toUpdate.id ? toUpdate : card;
+                        });
+                        newCards.sort(cardSorter);
+                        return {
+                            ...column,
+                            cards: newCards
+                        };
+                    }
+                    return column;
+                })
+            );
+        } else if (type === 'DELETE') {
+            const {cardId, columnId} = cardEvent;
+            setColumns(columns.map(column => {
+                    if (column.id === columnId) {
+                        const newCards: CardType[] = column.cards.filter(card => card.id !== cardId)
+                        newCards.sort(cardSorter);
+                        return {
+                            ...column,
+                            cards: newCards
+                        };
+                    }
+                    return column;
+                })
+            );
+        }
+    };
+
+    const handleAddExistingCard = (columnId: ColumnId, card: Partial<CardType>) => {
+        fetch(`http://localhost:8080/boards/${slug}/cards`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Emitter-Id': emitterId || '00000000-0000-0000-0000-000000000000'
+            },
+            body: JSON.stringify({...card, ...{columnId}})
+        }).then();
     };
     const handleAddCard = (columnId: ColumnId, text: string, done: boolean) => {
-        const card: CardType = {id: getTsid(), text, done, columnId, like: 0};
+        const card: Partial<CardType> = {text, done, columnId};
         handleAddExistingCard(columnId, card);
     };
-    const handleUpdateCard = (cardId: CardId, toUpdate: Partial<CardType>) => {
-        setColumns(columns => columns.map(column => ({
-            ...column,
-            cards: column.cards.map(card => {
-                const updated = {...card, ...toUpdate};
-                return card.id === cardId ? updated : card;
-            })
-        })));
+    const handleUpdateCard = (columnId: ColumnId, cardId: CardId, toUpdate: Partial<CardType>) => {
+        fetch(`http://localhost:8080/boards/${slug}/cards/${cardId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Emitter-Id': emitterId || '00000000-0000-0000-0000-000000000000'
+            },
+            body: JSON.stringify({...toUpdate, ...{columnId}})
+        }).then();
     };
-
+    const handleAddLike = (cardId: CardId) => {
+        fetch(`http://localhost:8080/boards/${slug}/cards/${cardId}/like`, {
+            method: 'POST',
+            headers: {
+                'X-Emitter-Id': emitterId || '00000000-0000-0000-0000-000000000000'
+            }
+        }).then();
+    };
     const handleDeleteCard = (cardId: CardId) => {
-        setColumns(columns => columns.map(column => ({
-            ...column,
-            cards: column.cards.filter(card => card.id !== cardId)
-        })));
+        fetch(`http://localhost:8080/boards/${slug}/cards/${cardId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Emitter-Id': emitterId || '00000000-0000-0000-0000-000000000000'
+            }
+        }).then();
     };
 
     const handleDrag = (columnId: ColumnId, card: CardType) => {
@@ -92,7 +149,7 @@ const Board: React.FC<BoardProps> = ({title}) => {
 
     return (
         <>
-            <BoardTitle>{title}</BoardTitle>
+            <BoardTitle>{name}</BoardTitle>
             <StyledBoard>
                 {columns.map(column => <Column
                     id={column.id}
@@ -103,6 +160,7 @@ const Board: React.FC<BoardProps> = ({title}) => {
                     onAddCard={(text) => handleAddCard(column.id, text, false)}
                     onDeleteCard={handleDeleteCard}
                     onUpdateCard={handleUpdateCard}
+                    onAddLike={handleAddLike}
                     onDrop={handleDrag}
                     key={column.title}/>)}
             </StyledBoard>

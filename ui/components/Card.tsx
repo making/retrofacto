@@ -42,14 +42,13 @@ const StyledText = styled.span`
 interface CardTypeProps extends CardType {
     onDelete: (() => void);
     onUpdate: ((toUpdate: Partial<CardType>) => void);
+    onAddLike: (() => void);
 }
 
-const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete, onUpdate}) => {
+const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete, onUpdate, onAddLike}) => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [txt, setTxt] = useState<string>(text);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [likeCount, setLikeCount] = useState<number>(0);
-
 
     const startEditing = () => setIsEditing(true);
     const finishEditing = () => setIsEditing(false);
@@ -75,6 +74,10 @@ const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete
         }
     };
 
+    const handleAddLike = () => {
+        onAddLike();
+    }
+
     const markAsDone = () => {
         onUpdate({done: true});
         finishEditing();
@@ -88,7 +91,7 @@ const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete
 
     const Text = () => done ? <del>{text}</del> : <>{text}</>
 
-    const me: CardType = {id, text, done, columnId, like: likeCount};
+    const me: CardType = {id, text, done, columnId, like};
     const [{isDragging}, dragRef] = useDrag({
         type: 'CARD',
         item: me,
@@ -99,7 +102,7 @@ const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete
     return (
         <>
             <StyledCard $done={done} ref={dragRef} style={{opacity: isDragging ? 0.5 : 1}}>
-                <Like cardId={id} initial={like} readOnly={done} setLikeCount={setLikeCount}/>
+                <Like cardId={id} like={like} readOnly={done} handleAddLike={handleAddLike}/>
                 {isEditing ?
                     <StyledForm onSubmit={handleSubmit}>
                         <StyledInput type="text" value={txt} onChange={handleChange} autoFocus/>
@@ -115,7 +118,7 @@ const Card: React.FC<CardTypeProps> = ({id, text, done, columnId, like, onDelete
                    markAsDone={markAsDone}
                    redo={redo}>
                 <div>
-                    <Like cardId={id} initial={likeCount} readOnly={true} setLikeCount={setLikeCount}/>
+                    <Like cardId={id} like={like} readOnly={true} handleAddLike={() => {}}/>
                     <p><Text/></p>
                 </div>
             </Modal>

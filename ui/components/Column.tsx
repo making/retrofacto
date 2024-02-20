@@ -26,7 +26,8 @@ const EmojiIconContainer = styled.div`
 interface ColumnProps extends ColumnType {
     onAddCard: ((text: string) => void);
     onDeleteCard: ((cardId: CardId) => void);
-    onUpdateCard: ((cardId: CardId, toUpdate: Partial<CardType>) => void);
+    onUpdateCard: ((columnId: ColumnId, cardId: CardId, toUpdate: Partial<CardType>) => void);
+    onAddLike: ((cardId: CardId) => void);
     onDrop: ((columnId: ColumnId, card: CardType) => void);
 }
 
@@ -39,6 +40,7 @@ const Column: React.FC<ColumnProps> = ({
                                            onAddCard,
                                            onDeleteCard,
                                            onUpdateCard,
+                                           onAddLike,
                                            onDrop
                                        }) => {
     const [text, setText] = useState<string>("");
@@ -75,8 +77,9 @@ const Column: React.FC<ColumnProps> = ({
                     columnId={card.columnId}
                     like={card.like}
                     onDelete={() => onDeleteCard(card.id)}
-                    onUpdate={toUpdate => onUpdateCard(card.id, toUpdate)}
-                    key={card.id.toBase62String()}
+                    onUpdate={toUpdate => onUpdateCard(card.columnId, card.id, toUpdate)}
+                    onAddLike={() => onAddLike(card.id)}
+                    key={card.id}
                 />
             )}
         </StyledColumn>
