@@ -63,7 +63,7 @@ const updateCards = (columns: ColumnType[], columnId: ColumnId, getNewCards: ((c
 const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
     const [name, setName] = useState<string>("...");
     const [columns, setColumns] = useState<ColumnType[]>([]);
-    const [emitterId, setEmitterId] = useState<string>();
+    const [emitterId, setEmitterId] = useState<string>('00000000-0000-0000-0000-000000000000');
 
     eventSource.onmessage = event => {
         const cardEvent = JSON.parse(event.data) as CardEvent;
@@ -113,7 +113,7 @@ const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Emitter-Id': emitterId || '00000000-0000-0000-0000-000000000000'
+                'X-Emitter-Id': emitterId
             },
             body: JSON.stringify({...toUpdate, ...{columnId}})
         }).then();
@@ -122,7 +122,7 @@ const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
         fetch(`http://localhost:8080/boards/${slug}/cards/${cardId}/like`, {
             method: 'POST',
             headers: {
-                'X-Emitter-Id': emitterId || '00000000-0000-0000-0000-000000000000'
+                'X-Emitter-Id': emitterId
             }
         }).then();
     };
@@ -130,7 +130,7 @@ const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
         fetch(`http://localhost:8080/boards/${slug}/cards/${cardId}`, {
             method: 'DELETE',
             headers: {
-                'X-Emitter-Id': emitterId || '00000000-0000-0000-0000-000000000000'
+                'X-Emitter-Id': emitterId
             }
         }).then();
     };
