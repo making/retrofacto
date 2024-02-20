@@ -36,6 +36,19 @@ const cardSorter = (a: CardType, b: CardType) => {
     return 0;
 };
 
+const updateCards = (columns: ColumnType[], columnId: ColumnId, getNewCards: ((column: ColumnType) => CardType[])) =>
+    columns.map(column => {
+        if (column.id === columnId) {
+            const newCards = getNewCards(column);
+            newCards.sort(cardSorter);
+            return {
+                ...column,
+                cards: newCards
+            };
+        }
+        return column;
+    });
+
 const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
 
     const [name, setName] = useState<string>("...");
@@ -56,48 +69,19 @@ const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
             setColumns(board.columns);
         } else if (type === 'CREATE') {
             const {card, columnId} = cardEvent;
-            setColumns(columns.map(column => {
-                    if (column.id === columnId) {
-                        const newCards: CardType[] = [...column.cards, card];
-                        newCards.sort(cardSorter);
-                        return {
-                            ...column,
-                            cards: newCards
-                        };
-                    }
-                    return column;
-                })
-            );
+            setColumns(updateCards(columns, columnId, column =>
+                [...column.cards, card]));
         } else if (type === 'UPDATE') {
             const {card: toUpdate, columnId} = cardEvent;
-            setColumns(columns.map(column => {
-                    if (column.id === columnId) {
-                        const newCards: CardType[] = column.cards.map(card => {
-                            return card.id === toUpdate.id ? toUpdate : card;
-                        });
-                        newCards.sort(cardSorter);
-                        return {
-                            ...column,
-                            cards: newCards
-                        };
-                    }
-                    return column;
-                })
+            setColumns(updateCards(columns, columnId, column =>
+                column.cards.map(card => {
+                    return card.id === toUpdate.id ? toUpdate : card;
+                }))
             );
         } else if (type === 'DELETE') {
             const {cardId, columnId} = cardEvent;
-            setColumns(columns.map(column => {
-                    if (column.id === columnId) {
-                        const newCards: CardType[] = column.cards.filter(card => card.id !== cardId)
-                        newCards.sort(cardSorter);
-                        return {
-                            ...column,
-                            cards: newCards
-                        };
-                    }
-                    return column;
-                })
-            );
+            setColumns(updateCards(columns, columnId, column =>
+                column.cards.filter(card => card.id !== cardId)));
         }
     };
 
