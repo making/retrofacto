@@ -119,6 +119,9 @@ public class SseEmitterManager implements MessageHandler {
 				catch (IOException e) {
 					log.debug("Failed to send event on emitter (%s)".formatted(emitterId), e);
 				}
+				catch (IllegalStateException e) {
+					log.warn("Failed to send event on emitter (%s)".formatted(emitterId), e);
+				}
 			}
 		}
 	}
