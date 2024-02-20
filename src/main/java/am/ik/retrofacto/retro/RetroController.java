@@ -37,7 +37,7 @@ public class RetroController {
 
 	private final SseEmitterManager sseEmitterManager;
 
-	private static final String EMITTER_ID_HEADER = "X-EmitterId";
+	private static final String EMITTER_ID_HEADER = "X-Emitter-Id";
 
 	public RetroController(RetroService retroService, BoardRepository boardRepository, CardRepository cardRepository,
 			SseEmitterManager sseEmitterManager) {
@@ -61,10 +61,11 @@ public class RetroController {
 	@GetMapping(path = "/boards/{slug}/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public ResponseEntity<SseEmitter> cardEvents(@PathVariable String slug) {
 		Map.Entry<UUID, SseEmitter> entry = this.sseEmitterManager.newEmitter(slug);
+		UUID emitterId = entry.getKey();
 		this.boardRepository.findBySlug(slug)
-			.ifPresent(
-					board -> this.sseEmitterManager.sendImmediateEvent(slug, entry.getKey(), new CardLoadEvent(board)));
-		return ResponseEntity.ok().header(EMITTER_ID_HEADER, entry.getKey().toString()).body(entry.getValue());
+			.ifPresent(board -> this.sseEmitterManager.sendImmediateEvent(slug, emitterId,
+					new CardLoadEvent(emitterId, board)));
+		return ResponseEntity.ok().body(entry.getValue());
 	}
 
 	@PostMapping(path = "/boards/{slug}/cards")
