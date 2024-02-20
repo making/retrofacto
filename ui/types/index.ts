@@ -19,7 +19,7 @@ export interface ColumnType {
 }
 
 export interface BoardType {
-    id: string;
+    id: BoardId;
     slug: string;
     name: string;
     passphrase: string | null;
