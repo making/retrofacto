@@ -2,7 +2,18 @@ import * as React from "react";
 import {useState} from "react";
 import Column from "./Column";
 import styled from "styled-components";
-import {CardId, CardType, ColumnId, ColumnType} from "../types";
+import {
+    CardCreateEvent,
+    CardDeleteEvent,
+    CardEvent,
+    CardId,
+    CardLoadEvent,
+    CardType,
+    CardUpdateEvent,
+    ColumnId,
+    ColumnType,
+    EventType
+} from "../types";
 
 const BoardTitle = styled.h2`
   text-align: center;
@@ -50,36 +61,34 @@ const updateCards = (columns: ColumnType[], columnId: ColumnId, getNewCards: ((c
     });
 
 const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
-
     const [name, setName] = useState<string>("...");
     const [columns, setColumns] = useState<ColumnType[]>([]);
     const [emitterId, setEmitterId] = useState<string>();
 
-
     eventSource.onmessage = event => {
-        const cardEvent = JSON.parse(event.data);
+        const cardEvent = JSON.parse(event.data) as CardEvent;
         const type = cardEvent.type;
-        if (type === 'LOAD') {
-            const board = cardEvent.board;
+        if (type === EventType.LOAD) {
+            const {board, emitterId} = cardEvent as CardLoadEvent;
             board.columns.forEach((column: ColumnType) => {
                 column.cards.sort(cardSorter);
             });
-            setEmitterId(cardEvent.emitterId);
+            setEmitterId(emitterId);
             setName(board.name);
             setColumns(board.columns);
-        } else if (type === 'CREATE') {
-            const {card, columnId} = cardEvent;
+        } else if (type === EventType.CREATE) {
+            const {card, columnId} = cardEvent as CardCreateEvent;
             setColumns(updateCards(columns, columnId, column =>
                 [...column.cards, card]));
-        } else if (type === 'UPDATE') {
-            const {card: toUpdate, columnId} = cardEvent;
+        } else if (type === EventType.UPDATE) {
+            const {card: toUpdate, columnId} = cardEvent as CardUpdateEvent;
             setColumns(updateCards(columns, columnId, column =>
                 column.cards.map(card => {
                     return card.id === toUpdate.id ? toUpdate : card;
                 }))
             );
-        } else if (type === 'DELETE') {
-            const {cardId, columnId} = cardEvent;
+        } else if (type === EventType.DELETE) {
+            const {cardId, columnId} = cardEvent as CardDeleteEvent;
             setColumns(updateCards(columns, columnId, column =>
                 column.cards.filter(card => card.id !== cardId)));
         }
