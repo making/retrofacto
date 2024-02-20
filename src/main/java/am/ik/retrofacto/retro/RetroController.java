@@ -73,8 +73,8 @@ public class RetroController {
 			@RequestBody CreateCardRequest request, UriComponentsBuilder builder) {
 		Card card = CardBuilder.card()
 			.text(request.text())
-			.done(false)
-			.like(0)
+			.done(request.done())
+			.like(request.like())
 			.column(new Column(request.columnId()))
 			.build();
 		Card created = this.cardRepository.save(card);
@@ -112,7 +112,7 @@ public class RetroController {
 
 	}
 
-	public record CreateCardRequest(String text, TSID columnId) {
+	public record CreateCardRequest(String text, boolean done, int like, TSID columnId) {
 
 	}
 
