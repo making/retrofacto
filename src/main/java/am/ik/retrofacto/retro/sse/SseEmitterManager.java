@@ -109,18 +109,20 @@ public class SseEmitterManager implements MessageHandler {
 		if (emitters != null) {
 			for (Map.Entry<UUID, SseEmitter> entry : emitters.entrySet()) {
 				UUID emitterId = entry.getKey();
+				SseEmitter emitter = entry.getValue();
 				if (Objects.equals(emitterId, senderId)) {
 					continue;
 				}
 				try {
-					SseEmitter emitter = entry.getValue();
 					emitter.send(message.getPayload());
 				}
 				catch (IOException e) {
 					log.debug("Failed to send event on emitter (%s)".formatted(emitterId), e);
+					emitter.completeWithError(e);
 				}
 				catch (IllegalStateException e) {
 					log.warn("Failed to send event on emitter (%s)".formatted(emitterId), e);
+					emitter.completeWithError(e);
 				}
 			}
 		}
