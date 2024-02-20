@@ -99,7 +99,7 @@ const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Emitter-Id': emitterId || '00000000-0000-0000-0000-000000000000'
+                'X-Emitter-Id': emitterId
             },
             body: JSON.stringify({...card, ...{columnId}})
         }).then();
