@@ -58,6 +58,11 @@ public class RetroController {
 		return ResponseEntity.of(this.boardRepository.findBySlug(slug));
 	}
 
+	@DeleteMapping(path = "/boards/{slug}")
+	public ResponseEntity<?> deleteBoard(@PathVariable String slug) {
+		return ResponseEntity.of(this.retroService.deleteBoard(slug).map(__ -> "Deleted"));
+	}
+
 	@GetMapping(path = "/boards/{slug}/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public ResponseEntity<SseEmitter> cardEvents(@PathVariable String slug) {
 		Map.Entry<UUID, SseEmitter> entry = this.sseEmitterManager.newEmitter(slug);

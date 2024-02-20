@@ -59,6 +59,14 @@ public class RetroService {
 	}
 
 	@Transactional
+	public Optional<Board> deleteBoard(String slug) {
+		return this.boardRepository.findBySlug(slug).map(board -> {
+			this.boardRepository.delete(board);
+			return board;
+		});
+	}
+
+	@Transactional
 	public Optional<Card> addLike(TSID cardId) {
 		this.cardRepository.addLike(cardId);
 		return this.cardRepository.findById(cardId);
