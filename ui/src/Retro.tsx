@@ -47,7 +47,7 @@ const Retro = () => {
     ) || (notFound &&             <div>
         <p>
             ⁉️The requested retro board is not found.<br/>
-            <Link to={`/retros`} reloadDocument={true}>Create a new board</Link>.
+            <Link to={`/retros`}>Create a new board</Link>.
         </p>
     </div>));
 };
