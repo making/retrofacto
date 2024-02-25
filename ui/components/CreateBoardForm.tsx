@@ -74,8 +74,7 @@ const BoardForm: React.FC<BoardFormProps> = () => {
     return (created ?
             <MessageBox>
                 <MessageText>✅ New board ("{formData.name}") has been created!</MessageText>
-                <MessageText>Go to <Link to={`/retros/${formData.slug}`} reloadDocument={true}>the
-                    board</Link> !</MessageText>
+                <MessageText>Go to <Link to={`/retros/${formData.slug}`}>the board</Link> !</MessageText>
             </MessageBox>
             :
             <div>
