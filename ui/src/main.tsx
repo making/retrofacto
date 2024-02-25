@@ -13,7 +13,7 @@ const router = createBrowserRouter([
             <h1>Retrofacto</h1>
             <NavigateToBoardForm/>
             <p>
-                Or <Link to={`/retros`} reloadDocument={true}>create a new board</Link>.
+                Or <Link to={`/retros`}>create a new board</Link>.
             </p>
         </div>,
     },
