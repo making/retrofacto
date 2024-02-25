@@ -1,5 +1,6 @@
 import * as React from 'react';
 import styled from 'styled-components';
+import {GreenButton} from "./GreenButton.tsx";
 
 const ModalBackdrop = styled.div`
   position: fixed;
@@ -45,24 +46,6 @@ const DoneButtonContainer = styled.div`
   padding-top: 20px;
 `;
 
-const DoneButton = styled.button`
-  background-color: #70beb1;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #62a89f;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
 interface ModalProps {
     children: React.ReactNode;
     isOpen: boolean;
@@ -81,8 +64,8 @@ const Modal: React.FC<ModalProps> = ({children, isOpen, done, onClose, markAsDon
                 <CloseButton onClick={onClose}>×</CloseButton>
                 <DoneButtonContainer>
                     {done ?
-                        <DoneButton onClick={redo}>Redo</DoneButton> :
-                        <DoneButton onClick={markAsDone}>Done</DoneButton>}
+                        <GreenButton onClick={redo}>Redo</GreenButton> :
+                        <GreenButton onClick={markAsDone}>Done</GreenButton>}
                 </DoneButtonContainer>
             </ModalContent>
         </ModalBackdrop>

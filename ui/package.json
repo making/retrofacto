@@ -11,10 +11,14 @@
     "test": "CI=true vitest"
   },
   "dependencies": {
+    "localforage": "^1.10.0",
+    "match-sorter": "^6.3.4",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.1",
+    "sort-by": "^1.2.0",
     "styled-components": "^6.1.8",
     "tsid-ts": "^0.0.8"
   },
