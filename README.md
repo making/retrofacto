@@ -6,3 +6,20 @@ A clone of [Postfacto](https://github.com/vmware-archive/postfacto)
 
 Demo (no backend)
 https://retrofacto.maki.lol
+
+## How to deploy to Tanzu Application Platform
+
+```
+tanzu service class-claim create retrofacto-db --class postgresql-unmanaged --parameter storageGB=1 -n apps
+
+tanzu apps workload apply retrofacto \
+  --app retrofacto \
+  --git-repo https://github.com/making/retrofacto \
+  --git-branch main \
+  --type web \
+  --annotation autoscaling.knative.dev/minScale=1 \
+  --service-ref blog-db=services.apps.tanzu.vmware.com/v1alpha1:ClassClaim:retrofacto-db \
+  --build-env BP_JVM_VERSION=17 \
+  --build-env BP_MAVEN_BUILT_ARTIFACT='retrofacto-server/target/*.jar' \
+  -n apps
+```
