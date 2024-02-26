@@ -17,7 +17,7 @@ public class TestRetrofactoApplication {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.from(RetrofactoApplication::main).with(TestRetrofactoApplication.class).run(args);
+		SpringApplication.from(RetrofactoServerApplication::main).with(TestRetrofactoApplication.class).run(args);
 	}
 
 }

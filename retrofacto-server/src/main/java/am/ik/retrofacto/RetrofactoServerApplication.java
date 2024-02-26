@@ -6,10 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-public class RetrofactoApplication {
+public class RetrofactoServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RetrofactoApplication.class, args);
+		SpringApplication.run(RetrofactoServerApplication.class, args);
 	}
 
 }

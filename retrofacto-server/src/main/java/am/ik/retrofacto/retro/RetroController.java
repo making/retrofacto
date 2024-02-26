@@ -11,6 +11,8 @@ import am.ik.retrofacto.retro.event.CardUpdateEvent;
 import am.ik.retrofacto.retro.sse.SseEmitterManager;
 import io.hypersistence.tsid.TSID;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -46,6 +48,11 @@ public class RetroController {
 		this.boardRepository = boardRepository;
 		this.cardRepository = cardRepository;
 		this.sseEmitterManager = sseEmitterManager;
+	}
+
+	@GetMapping(path = { "/", "/retros", "/retros/**" })
+	public Resource index() {
+		return new ClassPathResource("META-INF/resources/index.html");
 	}
 
 	@PostMapping(path = "/boards")

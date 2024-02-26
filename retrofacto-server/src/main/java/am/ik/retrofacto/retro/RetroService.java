@@ -48,7 +48,7 @@ public class RetroService {
 		Column red = column().title("It wasn't so great that...").emoji("😱").color("#d35948").cards(List.of()).build();
 		Board board = board().name(name)
 			.slug(slug)
-			.passphrase(passphrase == null ? null : this.passwordEncoder.encode(passphrase))
+			.passphrase(StringUtils.hasText(passphrase) ? this.passwordEncoder.encode(passphrase) : null)
 			.columns(List.of(green, yellow, red))
 			.build();
 		green.setBoard(board);

@@ -32,6 +32,8 @@ public class TokenController {
 
 	private final Clock clock;
 
+	private static final int EXPIRY_HOUR = 3;
+
 	public TokenController(RetroService retroService, JwtEncoder encoder, Clock clock) {
 		this.retroService = retroService;
 		this.encoder = encoder;
@@ -51,14 +53,15 @@ public class TokenController {
 		Instant now = Instant.now(this.clock);
 		JwtClaimsSet claims = JwtClaimsSet.builder()
 			.issuedAt(now)
-			.expiresAt(now.plus(3, ChronoUnit.HOURS))
+			// expires after the corresponding cookie expires
+			.expiresAt(now.plus(EXPIRY_HOUR, ChronoUnit.HOURS).plusMillis(5))
 			.issuer("retrofacto")
 			.audience(List.of(request.slug()))
 			.build();
 		String jwt = this.encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 		ResponseCookie cookie = ResponseCookie.from(RetroConstants.RETRO_COOKIE_PREFIX + request.slug(), jwt)
 			.httpOnly(true)
-			.maxAge(Duration.ofHours(3))
+			.maxAge(Duration.ofHours(EXPIRY_HOUR))
 			.build();
 		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
 	}
