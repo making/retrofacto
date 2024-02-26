@@ -62,6 +62,7 @@ public class TokenController {
 		ResponseCookie cookie = ResponseCookie.from(RetroConstants.RETRO_COOKIE_PREFIX + request.slug(), jwt)
 			.httpOnly(true)
 			.maxAge(Duration.ofHours(EXPIRY_HOUR))
+			.path("/boards/" + request.slug)
 			.sameSite("Lax")
 			.build();
 		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
