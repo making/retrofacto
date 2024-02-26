@@ -33,8 +33,9 @@ const StyledBoard = styled.div`
 
 
 interface BoardProps {
+    name: string,
     slug: string,
-    eventSource: EventSource;
+    eventSource?: EventSource;
 }
 
 const cardSorter = (a: CardType, b: CardType) => {
@@ -60,42 +61,42 @@ const updateCards = (columns: ColumnType[], columnId: ColumnId, getNewCards: ((c
         return column;
     });
 
-const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
-    const [name, setName] = useState<string>("...");
+const Board: React.FC<BoardProps> = ({name, slug, eventSource}) => {
     const [columns, setColumns] = useState<ColumnType[]>([]);
     const [emitterId, setEmitterId] = useState<string>('00000000-0000-0000-0000-000000000000');
 
-    eventSource.onmessage = event => {
-        const cardEvent = JSON.parse(event.data) as CardEvent;
-        const type = cardEvent.type;
-        if (type === EventType.LOAD) {
-            const {board, emitterId} = cardEvent as CardLoadEvent;
-            board.columns.forEach((column: ColumnType) => {
-                column.cards.sort(cardSorter);
-            });
-            setEmitterId(emitterId);
-            setName(board.name);
-            setColumns(board.columns);
-        } else if (type === EventType.CREATE) {
-            const {card, columnId} = cardEvent as CardCreateEvent;
-            setColumns(updateCards(columns, columnId, column =>
-                [...column.cards, card]));
-        } else if (type === EventType.UPDATE) {
-            const {card: toUpdate, columnId} = cardEvent as CardUpdateEvent;
-            setColumns(updateCards(columns, columnId, column =>
-                column.cards.map(card => {
-                    return card.id === toUpdate.id ? toUpdate : card;
-                }))
-            );
-        } else if (type === EventType.DELETE) {
-            const {cardId, columnId} = cardEvent as CardDeleteEvent;
-            setColumns(updateCards(columns, columnId, column =>
-                column.cards.filter(card => card.id !== cardId)));
-        }
-    };
+    if (eventSource) {
+        eventSource.onmessage = event => {
+            const cardEvent = JSON.parse(event.data) as CardEvent;
+            const type = cardEvent.type;
+            if (type === EventType.LOAD) {
+                const {board, emitterId} = cardEvent as CardLoadEvent;
+                board.columns.forEach((column: ColumnType) => {
+                    column.cards.sort(cardSorter);
+                });
+                setEmitterId(emitterId);
+                setColumns(board.columns);
+            } else if (type === EventType.CREATE) {
+                const {card, columnId} = cardEvent as CardCreateEvent;
+                setColumns(updateCards(columns, columnId, column =>
+                    [...column.cards, card]));
+            } else if (type === EventType.UPDATE) {
+                const {card: toUpdate, columnId} = cardEvent as CardUpdateEvent;
+                setColumns(updateCards(columns, columnId, column =>
+                    column.cards.map(card => {
+                        return card.id === toUpdate.id ? toUpdate : card;
+                    }))
+                );
+            } else if (type === EventType.DELETE) {
+                const {cardId, columnId} = cardEvent as CardDeleteEvent;
+                setColumns(updateCards(columns, columnId, column =>
+                    column.cards.filter(card => card.id !== cardId)));
+            }
+        };
+    }
 
     const handleAddExistingCard = (columnId: ColumnId, card: Partial<CardType>) => {
-        fetch(`http://localhost:8080/boards/${slug}/cards`, {
+        fetch(`/boards/${slug}/cards`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -109,7 +110,7 @@ const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
         handleAddExistingCard(columnId, card);
     };
     const handleUpdateCard = (columnId: ColumnId, cardId: CardId, toUpdate: Partial<CardType>) => {
-        fetch(`http://localhost:8080/boards/${slug}/cards/${cardId}`, {
+        fetch(`/boards/${slug}/cards/${cardId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -119,7 +120,7 @@ const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
         }).then();
     };
     const handleAddLike = (cardId: CardId) => {
-        fetch(`http://localhost:8080/boards/${slug}/cards/${cardId}/like`, {
+        fetch(`/boards/${slug}/cards/${cardId}/like`, {
             method: 'POST',
             headers: {
                 'X-Emitter-Id': emitterId
@@ -127,7 +128,7 @@ const Board: React.FC<BoardProps> = ({slug, eventSource}) => {
         }).then();
     };
     const handleDeleteCard = (cardId: CardId) => {
-        fetch(`http://localhost:8080/boards/${slug}/cards/${cardId}`, {
+        fetch(`/boards/${slug}/cards/${cardId}`, {
             method: 'DELETE',
             headers: {
                 'X-Emitter-Id': emitterId

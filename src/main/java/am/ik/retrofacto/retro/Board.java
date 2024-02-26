@@ -3,6 +3,7 @@ package am.ik.retrofacto.retro;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.hypersistence.tsid.TSID;
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.CascadeType;
@@ -32,6 +33,7 @@ public class Board implements Serializable {
 	private String slug;
 
 	@jakarta.persistence.Column(nullable = true)
+	@JsonIgnore
 	private String passphrase;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "board")

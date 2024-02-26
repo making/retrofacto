@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import io.hypersistence.tsid.TSID;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -19,9 +20,24 @@ public class RetroService {
 
 	private final CardRepository cardRepository;
 
-	public RetroService(BoardRepository boardRepository, CardRepository cardRepository) {
+	private final PasswordEncoder passwordEncoder;
+
+	public RetroService(BoardRepository boardRepository, CardRepository cardRepository,
+			PasswordEncoder passwordEncoder) {
 		this.boardRepository = boardRepository;
 		this.cardRepository = cardRepository;
+		this.passwordEncoder = passwordEncoder;
+	}
+
+	public Optional<Board> findBySlug(String slug) {
+		return this.boardRepository.findBySlug(slug);
+	}
+
+	public boolean checkPassword(String rawPassword, Board board) {
+		if (!StringUtils.hasText(board.getPassphrase())) {
+			return true;
+		}
+		return this.passwordEncoder.matches(rawPassword, board.getPassphrase());
 	}
 
 	@Transactional
@@ -32,8 +48,7 @@ public class RetroService {
 		Column red = column().title("It wasn't so great that...").emoji("😱").color("#d35948").cards(List.of()).build();
 		Board board = board().name(name)
 			.slug(slug)
-			// TODO password encode
-			.passphrase(passphrase == null ? null : "{noop}" + passphrase)
+			.passphrase(passphrase == null ? null : this.passwordEncoder.encode(passphrase))
 			.columns(List.of(green, yellow, red))
 			.build();
 		green.setBoard(board);

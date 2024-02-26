@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,8 +55,14 @@ public class RetroController {
 	}
 
 	@GetMapping(path = "/boards/{slug}")
-	public ResponseEntity<Board> getBoard(@PathVariable String slug) {
-		return ResponseEntity.of(this.boardRepository.findBySlug(slug));
+	public ResponseEntity<?> getBoard(@PathVariable String slug,
+			@RequestAttribute(name = RetroConstants.RETRO_AUTHENTICATED, required = false) boolean authenticated) {
+		return this.boardRepository.findBySlug(slug).map(board -> {
+			if (!authenticated) {
+				return ResponseEntity.ok(PartialBoardResponse.from(board));
+			}
+			return ResponseEntity.ok().body(board);
+		}).orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@DeleteMapping(path = "/boards/{slug}")
@@ -119,6 +126,13 @@ public class RetroController {
 
 	public record CreateCardRequest(String text, boolean done, int like, TSID columnId) {
 
+	}
+
+	public record PartialBoardResponse(TSID id, String name, String slug) {
+
+		public static PartialBoardResponse from(Board board) {
+			return new PartialBoardResponse(board.getId(), board.getName(), board.getSlug());
+		}
 	}
 
 }

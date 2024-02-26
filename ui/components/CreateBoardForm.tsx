@@ -51,7 +51,7 @@ const BoardForm: React.FC<BoardFormProps> = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        fetch('http://localhost:8080/boards', {
+        fetch('/boards', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
