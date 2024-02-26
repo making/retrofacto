@@ -17,18 +17,15 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Component
-public class SseEmitterManager implements MessageHandler {
+public class SseEmitterManager implements EventHandler {
 
-	private final MessageChannel retrofactoChannel;
+	private final JdbcClient jdbcClient;
 
 	private final ObjectMapper objectMapper;
 
@@ -38,8 +35,8 @@ public class SseEmitterManager implements MessageHandler {
 
 	private final MeterRegistry meterRegistry;
 
-	public SseEmitterManager(MessageChannel retrofactoChannel, ObjectMapper objectMapper, MeterRegistry meterRegistry) {
-		this.retrofactoChannel = retrofactoChannel;
+	public SseEmitterManager(JdbcClient jdbcClient, ObjectMapper objectMapper, MeterRegistry meterRegistry) {
+		this.jdbcClient = jdbcClient;
 		this.objectMapper = objectMapper;
 		this.meterRegistry = meterRegistry;
 	}
@@ -86,15 +83,14 @@ public class SseEmitterManager implements MessageHandler {
 		}
 	}
 
+	@Transactional
 	public void broadcastEvent(String slug, UUID senderId, CardEvent cardEvent) {
 		this.sendImmediateEvent(slug, senderId, cardEvent);
 		try {
 			String payload = this.objectMapper.writeValueAsString(cardEvent);
-			Message<String> message = MessageBuilder.withPayload(payload)
-				.setHeader("slug", slug)
-				.setHeader("sender", Objects.requireNonNull(senderId.toString()))
-				.build();
-			this.retrofactoChannel.send(message);
+			this.jdbcClient.sql("""
+					SELECT pg_notify('retrofacto_event', :message)
+					""").param("message", "%s,%s,%s".formatted(slug, senderId, payload)).query().singleRow();
 		}
 		catch (JsonProcessingException e) {
 			throw new UncheckedIOException(e);
@@ -102,9 +98,7 @@ public class SseEmitterManager implements MessageHandler {
 	}
 
 	@Override
-	public void handleMessage(Message<?> message) throws MessagingException {
-		String slug = Objects.requireNonNull(message.getHeaders().get("slug")).toString();
-		UUID senderId = UUID.fromString(Objects.requireNonNull(message.getHeaders().get("sender")).toString());
+	public void onEvent(String slug, UUID senderId, String payload) {
 		ConcurrentMap<UUID, SseEmitter> emitters = this.emittersMap.get(slug);
 		if (emitters != null) {
 			for (Map.Entry<UUID, SseEmitter> entry : emitters.entrySet()) {
@@ -114,7 +108,7 @@ public class SseEmitterManager implements MessageHandler {
 					continue;
 				}
 				try {
-					emitter.send(message.getPayload());
+					emitter.send(payload);
 				}
 				catch (IOException e) {
 					log.debug("Failed to send event on emitter (%s)".formatted(emitterId), e);
