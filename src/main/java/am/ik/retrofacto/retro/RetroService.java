@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import io.hypersistence.tsid.TSID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ public class RetroService {
 		this.passwordEncoder = passwordEncoder;
 	}
 
+	@Cacheable(cacheNames = "board")
 	public Optional<Board> findBySlug(String slug) {
 		return this.boardRepository.findBySlug(slug);
 	}
@@ -74,6 +77,7 @@ public class RetroService {
 	}
 
 	@Transactional
+	@CacheEvict(cacheNames = "board")
 	public Optional<Board> deleteBoard(String slug) {
 		return this.boardRepository.findBySlug(slug).map(board -> {
 			this.boardRepository.delete(board);

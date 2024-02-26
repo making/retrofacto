@@ -64,6 +64,7 @@ public class RetroController {
 	@GetMapping(path = "/boards/{slug}")
 	public ResponseEntity<?> getBoard(@PathVariable String slug,
 			@RequestAttribute(name = RetroConstants.RETRO_AUTHENTICATED, required = false) boolean authenticated) {
+		// should not use a cached board because columns are not up-to-date.
 		return this.boardRepository.findBySlug(slug).map(board -> {
 			if (!authenticated) {
 				return ResponseEntity.ok(PartialBoardResponse.from(board));
