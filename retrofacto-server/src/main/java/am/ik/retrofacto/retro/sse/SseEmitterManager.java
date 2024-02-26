@@ -85,7 +85,6 @@ public class SseEmitterManager implements EventHandler {
 
 	@Transactional
 	public void broadcastEvent(String slug, UUID senderId, CardEvent cardEvent) {
-		this.sendImmediateEvent(slug, senderId, cardEvent);
 		try {
 			String payload = this.objectMapper.writeValueAsString(cardEvent);
 			this.jdbcClient.sql("""
@@ -104,9 +103,6 @@ public class SseEmitterManager implements EventHandler {
 			for (Map.Entry<UUID, SseEmitter> entry : emitters.entrySet()) {
 				UUID emitterId = entry.getKey();
 				SseEmitter emitter = entry.getValue();
-				if (Objects.equals(emitterId, senderId)) {
-					continue;
-				}
 				try {
 					emitter.send(payload);
 				}
