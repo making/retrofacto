@@ -20,6 +20,5 @@ tanzu apps workload apply retrofacto \
   --annotation autoscaling.knative.dev/minScale=1 \
   --service-ref blog-db=services.apps.tanzu.vmware.com/v1alpha1:ClassClaim:retrofacto-db \
   --build-env BP_JVM_VERSION=17 \
-  --build-env BP_MAVEN_BUILT_ARTIFACT='retrofacto-server/target/*.jar' \
   -n apps
 ```
