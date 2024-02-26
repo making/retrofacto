@@ -3,7 +3,6 @@ package am.ik.retrofacto.retro.sse;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -12,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import am.ik.retrofacto.retro.event.CardEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.hypersistence.tsid.TSID;
 import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -84,12 +84,12 @@ public class SseEmitterManager implements EventHandler {
 	}
 
 	@Transactional
-	public void broadcastEvent(String slug, UUID senderId, CardEvent cardEvent) {
+	public void broadcastEvent(String slug, CardEvent cardEvent) {
 		try {
 			String payload = this.objectMapper.writeValueAsString(cardEvent);
 			this.jdbcClient.sql("""
 					SELECT pg_notify('retrofacto_event', :message)
-					""").param("message", "%s,%s,%s".formatted(slug, senderId, payload)).query().singleRow();
+					""").param("message", "%s,%s,%s".formatted(TSID.fast(), slug, payload)).query().singleRow();
 		}
 		catch (JsonProcessingException e) {
 			throw new UncheckedIOException(e);
@@ -97,7 +97,7 @@ public class SseEmitterManager implements EventHandler {
 	}
 
 	@Override
-	public void onEvent(String slug, UUID senderId, String payload) {
+	public void onEvent(String slug, String payload) {
 		ConcurrentMap<UUID, SseEmitter> emitters = this.emittersMap.get(slug);
 		if (emitters != null) {
 			for (Map.Entry<UUID, SseEmitter> entry : emitters.entrySet()) {

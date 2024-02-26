@@ -3,7 +3,7 @@ package am.ik.retrofacto.retro.sse;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.UUID;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.annotation.PostConstruct;
@@ -64,21 +64,14 @@ public class PostgresCardEventSubscriber {
 							if (notifications == null) {
 								continue;
 							}
-							for (PGNotification notification : notifications) {
-								String message = notification.getParameter();
-								log.debug("Received: {}", message);
-								String[] vals = message.split(",", 3);
-								if (vals.length == 3) {
-									String slug = vals[0];
-									UUID senderId = UUID.fromString(vals[1]);
-									String payload = vals[2];
-									this.eventHandler.onEvent(slug, senderId, payload);
-								}
-								else {
-									log.warn("Invalid parameter: pid={}, name={}, parameter={}", notification.getPID(),
-											notification.getName(), message);
-								}
-							}
+							Arrays.stream(notifications)
+								.map(PGNotification::getParameter)
+								.map(NotifiedEvent::valueOf)
+								.sorted()
+								.forEach(event -> {
+									log.debug("Received: {}", event);
+									this.eventHandler.onEvent(event.slug(), event.payload());
+								});
 						}
 						catch (SQLException e) {
 							log.warn("SQL Exception occurred.", e);

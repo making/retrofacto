@@ -96,49 +96,49 @@ const Board: React.FC<BoardProps> = ({name, slug, eventSource}) => {
     }
 
     const handleAddExistingCard = (columnId: ColumnId, card: Partial<CardType>) => {
-        fetch(`/boards/${slug}/cards`, {
+        return fetch(`/boards/${slug}/cards`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Emitter-Id': emitterId
             },
             body: JSON.stringify({...card, ...{columnId}})
-        }).then();
+        });
     };
     const handleAddCard = (columnId: ColumnId, text: string, done: boolean) => {
         const card: Partial<CardType> = {text, done, columnId};
-        handleAddExistingCard(columnId, card);
+        return handleAddExistingCard(columnId, card);
     };
     const handleUpdateCard = (columnId: ColumnId, cardId: CardId, toUpdate: Partial<CardType>) => {
-        fetch(`/boards/${slug}/cards/${cardId}`, {
+        return fetch(`/boards/${slug}/cards/${cardId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Emitter-Id': emitterId
             },
             body: JSON.stringify({...toUpdate, ...{columnId}})
-        }).then();
+        });
     };
     const handleAddLike = (cardId: CardId) => {
-        fetch(`/boards/${slug}/cards/${cardId}/like`, {
+        return fetch(`/boards/${slug}/cards/${cardId}/like`, {
             method: 'POST',
             headers: {
                 'X-Emitter-Id': emitterId
             }
-        }).then();
+        });
     };
     const handleDeleteCard = (cardId: CardId) => {
-        fetch(`/boards/${slug}/cards/${cardId}`, {
+        return fetch(`/boards/${slug}/cards/${cardId}`, {
             method: 'DELETE',
             headers: {
                 'X-Emitter-Id': emitterId
             }
-        }).then();
+        });
     };
 
     const handleDrag = (columnId: ColumnId, card: CardType) => {
-        handleDeleteCard(card.id);
-        handleAddExistingCard(columnId, {...card, columnId});
+        return handleDeleteCard(card.id)
+            .then(() => handleAddExistingCard(columnId, {...card, columnId}));
     };
 
     return (
@@ -151,11 +151,11 @@ const Board: React.FC<BoardProps> = ({name, slug, eventSource}) => {
                     emoji={column.emoji}
                     cards={column.cards}
                     color={column.color}
-                    onAddCard={(text) => handleAddCard(column.id, text, false)}
-                    onDeleteCard={handleDeleteCard}
-                    onUpdateCard={handleUpdateCard}
-                    onAddLike={handleAddLike}
-                    onDrop={handleDrag}
+                    onAddCard={(text) => handleAddCard(column.id, text, false).then()}
+                    onDeleteCard={(cardId) => handleDeleteCard(cardId).then()}
+                    onUpdateCard={(columnId, cardId, toUpdate) => handleUpdateCard(columnId, cardId, toUpdate).then()}
+                    onAddLike={(cardId) => handleAddLike(cardId).then()}
+                    onDrop={(columnId, card) => handleDrag(columnId, card).then()}
                     key={column.title}/>)}
             </StyledBoard>
         </>

@@ -88,8 +88,8 @@ public class RetroController {
 	}
 
 	@PostMapping(path = "/boards/{slug}/cards")
-	public ResponseEntity<Card> createCard(@PathVariable String slug, @RequestHeader(EMITTER_ID_HEADER) UUID emitterId,
-			@RequestBody CreateCardRequest request, UriComponentsBuilder builder) {
+	public ResponseEntity<Card> createCard(@PathVariable String slug, @RequestBody CreateCardRequest request,
+			UriComponentsBuilder builder) {
 		Card card = CardBuilder.card()
 			.text(request.text())
 			.done(request.done())
@@ -97,32 +97,30 @@ public class RetroController {
 			.column(new Column(request.columnId()))
 			.build();
 		Card created = this.cardRepository.save(card);
-		this.sseEmitterManager.broadcastEvent(slug, emitterId, new CardCreateEvent(card));
+		this.sseEmitterManager.broadcastEvent(slug, new CardCreateEvent(card));
 		return ResponseEntity.created(builder.path("/boards/{slug}/cards/{cardId}").build(slug, created.getId()))
 			.body(created);
 	}
 
 	@PatchMapping(path = "/boards/{slug}/cards/{cardId}")
 	public ResponseEntity<Void> updateCard(@PathVariable String slug, @PathVariable TSID cardId,
-			@RequestHeader(EMITTER_ID_HEADER) UUID emitterId, @RequestBody UpdateCard update) {
+			@RequestBody UpdateCard update) {
 		this.retroService.updateCard(cardId, update)
-			.ifPresent(card -> this.sseEmitterManager.broadcastEvent(slug, emitterId, new CardUpdateEvent(card)));
+			.ifPresent(card -> this.sseEmitterManager.broadcastEvent(slug, new CardUpdateEvent(card)));
 		return ResponseEntity.accepted().build();
 	}
 
 	@PostMapping(path = "/boards/{slug}/cards/{cardId}/like")
-	public ResponseEntity<Void> addLike(@PathVariable String slug, @PathVariable TSID cardId,
-			@RequestHeader(EMITTER_ID_HEADER) UUID emitterId) {
+	public ResponseEntity<Void> addLike(@PathVariable String slug, @PathVariable TSID cardId) {
 		this.retroService.addLike(cardId)
-			.ifPresent(card -> this.sseEmitterManager.broadcastEvent(slug, emitterId, new CardUpdateEvent(card)));
+			.ifPresent(card -> this.sseEmitterManager.broadcastEvent(slug, new CardUpdateEvent(card)));
 		return ResponseEntity.accepted().build();
 	}
 
 	@DeleteMapping(path = "/boards/{slug}/cards/{cardId}")
-	public ResponseEntity<Void> deleteCard(@PathVariable String slug, @PathVariable TSID cardId,
-			@RequestHeader(EMITTER_ID_HEADER) UUID emitterId) {
+	public ResponseEntity<Void> deleteCard(@PathVariable String slug, @PathVariable TSID cardId) {
 		this.retroService.deleteCard(cardId)
-			.ifPresent(card -> this.sseEmitterManager.broadcastEvent(slug, emitterId,
+			.ifPresent(card -> this.sseEmitterManager.broadcastEvent(slug,
 					new CardDeleteEvent(cardId, card.getColumn().getId())));
 		return ResponseEntity.accepted().build();
 	}
