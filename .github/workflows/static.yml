@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: ui/package-lock.json
+          cache-dependency-path: retrofacto-ui/package-lock.json
       - name: Build
         run: |
           set -ex
