@@ -55,6 +55,7 @@ const Retro = () => {
                         break;
                     case EventSource.CLOSED:
                         console.log('Closed.')
+                        alert('The event source has been closed. Please refresh the page to reload the events.')
                         break;
                 }
             };
