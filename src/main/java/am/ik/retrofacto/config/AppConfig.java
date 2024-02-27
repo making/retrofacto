@@ -2,9 +2,12 @@ package am.ik.retrofacto.config;
 
 import java.time.Clock;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import am.ik.accesslogger.AccessLogger;
+import io.micrometer.core.instrument.config.MeterFilter;
 
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,12 +18,25 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class AppConfig {
 
+	private final Predicate<String> uriFilter = uri -> {
+		boolean deny = uri != null && (uri.equals("/readyz") || uri.equals("/livez") || uri.startsWith("/actuator")
+				|| uri.startsWith("/_static"));
+		return !deny;
+	};
+
 	@Bean
 	public AccessLogger accessLogger() {
-		return new AccessLogger(httpExchange -> {
-			final String uri = httpExchange.getRequest().getUri().getPath();
-			return uri != null && !(uri.equals("/readyz") || uri.equals("/livez") || uri.startsWith("/actuator"));
-		});
+		return new AccessLogger(httpExchange -> uriFilter.test(httpExchange.getRequest().getUri().getPath()));
+	}
+
+	@Bean
+	public MeterRegistryCustomizer<?> meterRegistryCustomizer() {
+		final Predicate<String> negate = uriFilter.negate();
+		return registry -> registry.config() //
+			.meterFilter(MeterFilter.deny(id -> {
+				final String uri = id.getTag("uri");
+				return negate.test(uri);
+			}));
 	}
 
 	@Bean
