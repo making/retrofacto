@@ -1,11 +1,13 @@
 package am.ik.retrofacto.retro;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.hypersistence.tsid.TSID;
 import io.hypersistence.utils.hibernate.id.Tsid;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,22 +31,24 @@ public class Column implements Serializable {
 	private TSID id;
 
 	@jakarta.persistence.Column(nullable = false)
-	private String title;
+	private String title = "";
 
 	@jakarta.persistence.Column(nullable = false)
-	private String emoji;
+	private String emoji = "";
 
 	@jakarta.persistence.Column(nullable = false)
-	private String color;
+	private String color = "";
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "column", orphanRemoval = true)
-	private List<Card> cards;
+	private List<Card> cards = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(nullable = false)
 	@JsonIgnore
+	@Nullable
 	private Board board;
 
+	@SuppressWarnings("NullAway")
 	public Column() {
 	}
 
@@ -101,6 +105,7 @@ public class Column implements Serializable {
 		this.color = color;
 	}
 
+	@Nullable
 	public Board getBoard() {
 		return board;
 	}

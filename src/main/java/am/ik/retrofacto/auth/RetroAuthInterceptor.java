@@ -33,7 +33,7 @@ public class RetroAuthInterceptor implements HandlerInterceptor {
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-		String[] paths = request.getServletPath().split("/");
+		String[] paths = request.getServletPath().split("/", 3);
 		request.setAttribute(RetroConstants.RETRO_AUTHENTICATED, false);
 		if (paths.length < 3 || !"boards".equals(paths[1])) {
 			return true;

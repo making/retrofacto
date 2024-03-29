@@ -40,8 +40,6 @@ public class RetroController {
 
 	private final SseEmitterManager sseEmitterManager;
 
-	private static final String EMITTER_ID_HEADER = "X-Emitter-Id";
-
 	public RetroController(RetroService retroService, BoardRepository boardRepository, CardRepository cardRepository,
 			SseEmitterManager sseEmitterManager) {
 		this.retroService = retroService;

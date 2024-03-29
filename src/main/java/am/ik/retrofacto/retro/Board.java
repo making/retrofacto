@@ -1,11 +1,14 @@
 package am.ik.retrofacto.retro;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.hypersistence.tsid.TSID;
 import io.hypersistence.utils.hibernate.id.Tsid;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,18 +30,20 @@ public class Board implements Serializable {
 	private TSID id;
 
 	@jakarta.persistence.Column(nullable = false)
-	private String name;
+	private String name = "";
 
 	@jakarta.persistence.Column(nullable = false, unique = true)
-	private String slug;
+	private String slug = "";
 
 	@jakarta.persistence.Column(nullable = true)
 	@JsonIgnore
+	@Nullable
 	private String passphrase;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "board")
-	private List<Column> columns;
+	private List<Column> columns = new ArrayList<>();
 
+	@SuppressWarnings("NullAway")
 	public Board() {
 	}
 
@@ -79,6 +84,7 @@ public class Board implements Serializable {
 		this.slug = slug;
 	}
 
+	@Nullable
 	public String getPassphrase() {
 		return passphrase;
 	}

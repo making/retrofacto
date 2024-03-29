@@ -30,7 +30,7 @@ public class Card implements Serializable {
 	private TSID id;
 
 	@Column(nullable = false)
-	private String text;
+	private String text = "";
 
 	@Column(nullable = false)
 	private boolean done;
@@ -48,6 +48,7 @@ public class Card implements Serializable {
 	@JsonIgnore
 	private int version;
 
+	@SuppressWarnings("NullAway")
 	public Card() {
 	}
 

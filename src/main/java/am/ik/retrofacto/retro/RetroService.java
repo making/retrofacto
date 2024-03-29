@@ -49,6 +49,7 @@ public class RetroService {
 		Column green = column().title("I'm glad that...").emoji("😀").color("#70beb1").cards(List.of()).build();
 		Column yellow = column().title("I'm wondering about...").emoji("🤔").color("#f5c94c").cards(List.of()).build();
 		Column red = column().title("It wasn't so great that...").emoji("😱").color("#d35948").cards(List.of()).build();
+		@SuppressWarnings("NullAway")
 		Board board = board().name(name)
 			.slug(slug)
 			.passphrase(StringUtils.hasText(passphrase) ? this.passwordEncoder.encode(passphrase) : null)
