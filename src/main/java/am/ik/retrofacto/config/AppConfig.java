@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import am.ik.accesslogger.AccessLogger;
+import am.ik.accesslogger.AccessLoggerBuilder;
 import io.micrometer.core.instrument.config.MeterFilter;
 
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
@@ -26,7 +27,10 @@ public class AppConfig {
 
 	@Bean
 	public AccessLogger accessLogger() {
-		return new AccessLogger(httpExchange -> uriFilter.test(httpExchange.getRequest().getUri().getPath()));
+		return AccessLoggerBuilder.accessLogger()
+			.filter(httpExchange -> uriFilter.test(httpExchange.getRequest().getUri().getPath()))
+			.addKeyValues(true)
+			.build();
 	}
 
 	@Bean
