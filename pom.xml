@@ -172,7 +172,7 @@
 				<configuration>
 					<installDirectory>target</installDirectory>
 					<workingDirectory>${project.basedir}/retrofacto-ui</workingDirectory>
-					<nodeVersion>v20.11.1</nodeVersion>
+					<nodeVersion>v20.13.1</nodeVersion>
 				</configuration>
 				<executions>
 					<execution>
@@ -198,29 +198,6 @@
 						<phase>compile</phase>
 						<configuration>
 							<arguments>run build</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-resources</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>
-								${basedir}/target/classes/META-INF/resources
-							</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.basedir}/retrofacto-ui/dist</directory>
-									<filtering>false</filtering>
-								</resource>
-							</resources>
 						</configuration>
 					</execution>
 				</executions>
