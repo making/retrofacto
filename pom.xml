@@ -144,7 +144,10 @@
 				<configuration>
 					<compilerArgs>
 						<arg>-XDcompilePolicy=simple</arg>
-						<arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=am.ik.retrofacto -XepExcludedPaths:(.*/test/java/.*|.*/target/generated-sources/.*)</arg>
+						<arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR
+							-XepOpt:NullAway:AnnotatedPackages=am.ik.retrofacto,org.springframework
+							-XepExcludedPaths:(.*/test/java/.*|.*/target/generated-sources/.*)
+						</arg>
 					</compilerArgs>
 					<annotationProcessorPaths>
 						<path>
